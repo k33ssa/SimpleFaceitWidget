@@ -48,7 +48,7 @@ if [ -z "$KEY" ] && [ -f Config/Secrets.xcconfig ]; then
   KEY="$(sed -nE 's/^ *FACEIT_API_KEY *= *([^ ]+).*/\1/p' Config/Secrets.xcconfig | head -1)"
 fi
 [ "${NO_BUNDLED_KEY:-0}" = 1 ] && KEY=""
-cfg() { [ -f Config/Secrets.xcconfig ] && sed -nE "s/^ *$1 *= *([^ ]*).*/\\1/p" Config/Secrets.xcconfig | head -1 | sed 's/\$()//g'; }  # xcconfig writes "//" as "/$()/"
+cfg() { [ -f Config/Secrets.xcconfig ] || return 0; sed -nE "s/^ *$1 *= *([^ ]*).*/\\1/p" Config/Secrets.xcconfig | head -1 | sed 's/\$()//g'; }  # xcconfig writes "//" as "/$()/"
 SERVER_URL="${FS_SERVER_URL:-$(cfg FS_SERVER_URL)}"
 APP_TOKEN="${FS_APP_TOKEN:-$(cfg FS_APP_TOKEN)}"
 

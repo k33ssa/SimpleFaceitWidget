@@ -44,6 +44,13 @@ struct SimpleFaceitApp: App {
             }
         }
         #endif
+        #if os(iOS)
+        .backgroundTask(.appRefresh(Self.backgroundTaskId)) {
+            // Keeps the shared cache (and exact ELO snapshots) fresh while the app is closed.
+            _ = try? await StatsRepository.shared.refresh(force: false)
+            Self.scheduleBackgroundRefresh(minutes: AppSettings().refreshMinutes)
+        }
+        #endif
         #if os(macOS)
         // Stays in the menu bar with the window closed and keeps syncing (incl. exact ELO) for the widgets.
         MenuBarExtra {
@@ -52,13 +59,6 @@ struct SimpleFaceitApp: App {
             MenuBarLabel().environment(model)
         }
         .menuBarExtraStyle(.window)
-        #endif
-        #if os(iOS)
-        .backgroundTask(.appRefresh(Self.backgroundTaskId)) {
-            // Keeps the shared cache (and exact ELO snapshots) fresh while the app is closed.
-            _ = try? await StatsRepository.shared.refresh(force: false)
-            Self.scheduleBackgroundRefresh(minutes: AppSettings().refreshMinutes)
-        }
         #endif
     }
 
