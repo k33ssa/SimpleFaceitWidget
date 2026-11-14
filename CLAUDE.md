@@ -42,6 +42,19 @@ xcodebuild -scheme SimpleFaceit-macOS -destination 'platform=macOS' -derivedData
 xcodebuild -scheme SimpleFaceit-iOS -destination 'generic/platform=iOS Simulator' -derivedDataPath /Volumes/XcodeSSD/DerivedData build
 ```
 
+## Свой сервер (с 14.11.2026) — основной источник данных
+
+* `server/` — Cloudflare Worker `https://simplefaceit.simplefaceit-server.workers.dev` (аккаунт пользователя, account id
+  `557b316e8a30d7761f00ecf371d6fe9c`), база D1 `simplefaceit`. Прокси официального API (`/v1/data/<путь>`, белый список,
+  кэш 45 с / матчи сутки), точный ELO `/v1/elo/<player_id>`, cron каждую минуту опрашивает отслеживаемых игроков и пишет
+  «ELO после игры». Ключ FACEIT — только секрет воркера; приложение шлёт `Bearer APP_TOKEN`.
+* Деплой: `cd server && CLOUDFLARE_API_TOKEN=$(cat ~/.config/cloudflare/api_token) CLOUDFLARE_ACCOUNT_ID=557b316e8a30d7761f00ecf371d6fe9c npx wrangler deploy`.
+  Токен Cloudflare — `~/.config/cloudflare/api_token` (600; не печатать). Вход `wrangler login` через браузер у пользователя
+  падает с `request_forbidden: No CSRF value` — использовать API-токен.
+* Адрес сервера и токен приложения — `Config/Secrets.xcconfig` (`FS_SERVER_URL`, `FS_APP_TOKEN`, в .gitignore);
+  `//` в xcconfig пишется как `/$()/`. Без них приложение работает напрямую с FACEIT по ключу пользователя.
+* Точный ELO копится с начала отслеживания (14.11.2026 06:31); раньше — только WebKit-импорт с faceit.com (на Маке).
+
 ## Соглашения и грабли
 
 * **Xcode на этом Маке нет** (пользователь не стал входить в Apple ID, 14.11.2026). macOS собирается через CLT:

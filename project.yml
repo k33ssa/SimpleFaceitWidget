@@ -44,6 +44,8 @@ targets:
         LSApplicationCategoryType: public.app-category.sports
         FSAppGroupIdentifier: 3P6X2MU65Y.com.k33ssa.simplefaceit
         FSBundledAPIKey: $(FACEIT_API_KEY)
+        FSServerURL: $(FS_SERVER_URL)
+        FSAppToken: $(FS_APP_TOKEN)
         CFBundleURLTypes:
           - CFBundleURLName: com.k33ssa.simplefaceit
             CFBundleURLSchemes: [faceitstats]
@@ -79,6 +81,8 @@ targets:
       properties:
         CFBundleDisplayName: SimpleFaceit
         FSAppGroupIdentifier: 3P6X2MU65Y.com.k33ssa.simplefaceit
+        FSServerURL: $(FS_SERVER_URL)
+        FSAppToken: $(FS_APP_TOKEN)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -118,6 +122,8 @@ targets:
         UIUserInterfaceStyle: Dark
         FSAppGroupIdentifier: group.com.k33ssa.simplefaceit
         FSBundledAPIKey: $(FACEIT_API_KEY)
+        FSServerURL: $(FS_SERVER_URL)
+        FSAppToken: $(FS_APP_TOKEN)
         BGTaskSchedulerPermittedIdentifiers: [com.k33ssa.simplefaceit.refresh]
         UIBackgroundModes: [fetch]
         CFBundleURLTypes:
@@ -151,6 +157,8 @@ targets:
       properties:
         CFBundleDisplayName: SimpleFaceit
         FSAppGroupIdentifier: group.com.k33ssa.simplefaceit
+        FSServerURL: $(FS_SERVER_URL)
+        FSAppToken: $(FS_APP_TOKEN)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:

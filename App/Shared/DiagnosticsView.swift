@@ -18,7 +18,8 @@ struct DiagnosticsView: View {
         Form {
             Section("Состояние") {
                 LabeledContent("App Group", value: AppGroup.isShared ? "общий (\(AppGroup.identifier ?? ""))" : "НЕ доступен — виджет не увидит данные")
-                LabeledContent("API-ключ", value: model.hasAPIKey ? "есть · \(APIKeyStore.backend.rawValue)" : "нет")
+                LabeledContent("Источник данных", value: ServerConfig.current.map { "свой сервер · \($0.url.host ?? "")" } ?? "FACEIT напрямую (свой ключ)")
+                LabeledContent("API-ключ", value: ServerConfig.isConfigured ? "на сервере" : (model.hasAPIKey ? "есть · \(APIKeyStore.backend.rawValue)" : "нет"))
                 LabeledContent("Профиль", value: model.settings.nickname ?? "не привязан")
                 if let d = model.dashboard {
                     LabeledContent("Данные получены", value: d.fetchedAt.formatted(date: .abbreviated, time: .standard))

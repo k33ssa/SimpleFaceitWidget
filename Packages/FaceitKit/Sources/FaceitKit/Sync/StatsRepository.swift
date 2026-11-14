@@ -47,7 +47,7 @@ public final class StatsRepository: @unchecked Sendable {
         self.store = store
         self.imageSession = imageSession
         self.clientFactory = clientFactory ?? { store in
-            FaceitAPIClient(apiKey: { APIKeyStore.load() }, trace: { t in
+            FaceitAPIClient.automatic(trace: { t in
                 if let e = t.error {
                     store.log(t.status.map { $0 >= 500 || $0 == 429 } ?? true ? .warning : .error,
                               "\(t.path) → \(t.status.map(String.init) ?? "—") (попытка \(t.attempt), \(t.durationMs) мс): \(e)")
@@ -122,6 +122,21 @@ public final class StatsRepository: @unchecked Sendable {
         if let elo = player.elo {
             try? store.addSnapshot(EloSnapshot(takenAt: fetchedAt, elo: elo, latestGameFinishedAt: games.first?.finishedAt,
                                                latestGameId: games.first?.id), playerId: playerId)
+        }
+
+        // Exact per-match ELO recorded by our server (polls FACEIT every minute) → match records.
+        if ServerConfig.isConfigured {
+            do {
+                if let r = try await FaceitAPIClient.serverElo(playerId: playerId) {
+                    for rec in r.records {
+                        try? store.addSnapshot(EloSnapshot(takenAt: Date(timeIntervalSince1970: rec.recorded_at / 1000), elo: rec.elo,
+                                                           latestGameFinishedAt: nil, latestGameId: rec.game_id,
+                                                           isMatchRecord: rec.gap == 1), playerId: playerId)
+                    }
+                }
+            } catch {
+                store.log(.warning, "Сервер ELO недоступен: \((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)")
+            }
         }
 
         // Match info (win probability, calculate_elo) for the window + 1 boundary game. Cached forever.

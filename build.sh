@@ -48,6 +48,9 @@ if [ -z "$KEY" ] && [ -f Config/Secrets.xcconfig ]; then
   KEY="$(sed -nE 's/^ *FACEIT_API_KEY *= *([^ ]+).*/\1/p' Config/Secrets.xcconfig | head -1)"
 fi
 [ "${NO_BUNDLED_KEY:-0}" = 1 ] && KEY=""
+cfg() { [ -f Config/Secrets.xcconfig ] && sed -nE "s/^ *$1 *= *([^ ]*).*/\\1/p" Config/Secrets.xcconfig | head -1 | sed 's/\$()//g'; }  # xcconfig writes "//" as "/$()/"
+SERVER_URL="${FS_SERVER_URL:-$(cfg FS_SERVER_URL)}"
+APP_TOKEN="${FS_APP_TOKEN:-$(cfg FS_APP_TOKEN)}"
 
 # --- Info.plist files ---
 cat > "$APP/Contents/Info.plist" <<EOF
@@ -71,6 +74,8 @@ cat > "$APP/Contents/Info.plist" <<EOF
   <key>NSPrincipalClass</key><string>NSApplication</string>
   <key>FSAppGroupIdentifier</key><string>$GROUP</string>
   <key>FSBundledAPIKey</key><string>$KEY</string>
+  <key>FSServerURL</key><string>$SERVER_URL</string>
+  <key>FSAppToken</key><string>$APP_TOKEN</string>
   <key>CFBundleURLTypes</key><array><dict>
     <key>CFBundleURLName</key><string>com.k33ssa.simplefaceit</string>
     <key>CFBundleURLSchemes</key><array><string>faceitstats</string></array>
@@ -93,6 +98,8 @@ cat > "$APPEX/Contents/Info.plist" <<EOF
   <key>CFBundleVersion</key><string>$BUILD</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>FSAppGroupIdentifier</key><string>$GROUP</string>
+  <key>FSServerURL</key><string>$SERVER_URL</string>
+  <key>FSAppToken</key><string>$APP_TOKEN</string>
   <key>NSExtension</key><dict>
     <key>NSExtensionPointIdentifier</key><string>com.apple.widgetkit-extension</string>
   </dict>

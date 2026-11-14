@@ -52,7 +52,7 @@ final class AppModel {
 
     init() {
         bootstrapKey()
-        hasAPIKey = APIKeyStore.load() != nil
+        hasAPIKey = ServerConfig.isConfigured || APIKeyStore.load() != nil
         isLinked = settings.playerId != nil
         dashboard = repo.cachedDashboard()
     }

@@ -1,0 +1,14 @@
+name = "simplefaceit"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+
+# Poll tracked players every minute (a CS2 match lasts 30–40 min, so every match is caught separately).
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "simplefaceit"
+database_id = "005d023b-ece1-4a0d-ab06-60231efae261"
+
+# Secrets (wrangler secret put …): FACEIT_API_KEY — FACEIT Data API key; APP_TOKEN — shared token the app sends.

@@ -59,6 +59,7 @@ public final class FaceitAPIClient: @unchecked Sendable {
     public static let game = "cs2"
 
     private let session: URLSession
+    private let baseURL: URL
     private let apiKey: @Sendable () -> String?
     private let maxAttempts: Int
     private let trace: (@Sendable (APITrace) -> Void)?
@@ -66,12 +67,14 @@ public final class FaceitAPIClient: @unchecked Sendable {
 
     public init(
         session: URLSession = FaceitAPIClient.defaultSession(),
+        baseURL: URL = FaceitAPIClient.baseURL,
         apiKey: @escaping @Sendable () -> String?,
         maxAttempts: Int = 3,
         trace: (@Sendable (APITrace) -> Void)? = nil,
         sleeper: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(nanoseconds: UInt64($0 * 1_000_000_000)) }
     ) {
         self.session = session
+        self.baseURL = baseURL
         self.apiKey = apiKey
         self.maxAttempts = max(1, maxAttempts)
         self.trace = trace
@@ -132,6 +135,29 @@ public final class FaceitAPIClient: @unchecked Sendable {
         try await get("matches/\(id)/stats", query: [:])
     }
 
+    /// Talks to our own server (proxy + exact ELO) when it is configured, otherwise straight to FACEIT with the user's key.
+    public static func automatic(session: URLSession = defaultSession(), maxAttempts: Int = 3,
+                                 trace: (@Sendable (APITrace) -> Void)? = nil) -> FaceitAPIClient {
+        if let s = ServerConfig.current {
+            let token = s.token
+            return FaceitAPIClient(session: session, baseURL: s.url.appendingPathComponent("v1/data/"), apiKey: { token },
+                                   maxAttempts: maxAttempts, trace: trace)
+        }
+        return FaceitAPIClient(session: session, apiKey: { APIKeyStore.load() }, maxAttempts: maxAttempts, trace: trace)
+    }
+
+    /// Exact per-match ELO recorded by our server (nil when no server is configured).
+    public static func serverElo(playerId: String, session: URLSession = defaultSession()) async throws -> ServerEloResponse? {
+        guard let s = ServerConfig.current else { return nil }
+        var req = URLRequest(url: s.url.appendingPathComponent("v1/elo/\(playerId)"))
+        req.setValue("Bearer \(s.token)", forHTTPHeaderField: "Authorization")
+        let (data, resp) = try await session.data(for: req)
+        guard (resp as? HTTPURLResponse)?.statusCode == 200 else {
+            throw FaceitAPIError.http(status: (resp as? HTTPURLResponse)?.statusCode ?? 0, "server /v1/elo")
+        }
+        return try JSONDecoder().decode(ServerEloResponse.self, from: data)
+    }
+
     // MARK: Transport
 
     func get<T: Decodable>(_ path: String, query: [String: String]) async throws -> T {
@@ -147,7 +173,7 @@ public final class FaceitAPIClient: @unchecked Sendable {
         guard let key = apiKey()?.trimmingCharacters(in: .whitespacesAndNewlines), !key.isEmpty else {
             throw FaceitAPIError.missingAPIKey
         }
-        var comps = URLComponents(url: Self.baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
+        var comps = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty {
             comps.queryItems = query.sorted { $0.key < $1.key }.map { URLQueryItem(name: $0.key, value: $0.value) }
         }

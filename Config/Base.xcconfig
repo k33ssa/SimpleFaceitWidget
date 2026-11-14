@@ -3,4 +3,7 @@
 // When set, the key is embedded for convenience in PERSONAL builds only and copied to secure storage on first launch.
 // Anyone holding such a .app can extract it — release builds must leave it empty (see docs/ARCHITECTURE.md).
 FACEIT_API_KEY =
+// Own backend (server/): base URL and the shared app token. Empty = talk to FACEIT directly with the user's key.
+FS_SERVER_URL =
+FS_APP_TOKEN =
 #include? "Secrets.xcconfig"
