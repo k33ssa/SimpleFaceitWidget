@@ -30,7 +30,11 @@ cd Packages/FaceitKit && swift test
 FACEIT_API_KEY=$(cat ~/.config/faceit/api_key) swift run SnapshotTool --player shmeeel --out /tmp/snap   # → widgets-dark/light.png
 swift run SnapshotTool --icon --out /tmp/icon
 
-# приложения (нужен Xcode; стоит на SSD, см. ниже)
+# macOS-приложение + виджет БЕЗ Xcode (основной путь на этом Маке): собрать, подписать, поставить в /Applications
+./build.sh                       # ключ для личной сборки берётся из Config/Secrets.xcconfig (в .gitignore)
+
+# приложения через Xcode (iOS и полная версия виджета с выбором стиля) — на GitHub Actions (.github/workflows/ci.yml)
+# или локально, если когда-нибудь поставят Xcode:
 hdiutil attach /Volumes/KINGSTON/xcode-dev/XcodeSSD.sparsebundle -nobrowse   # если не смонтирован
 export DEVELOPER_DIR=/Volumes/XcodeSSD/Xcode-16.4.0.app/Contents/Developer       # путь уточнить по факту
 xcodegen generate
@@ -39,6 +43,14 @@ xcodebuild -scheme SimpleFaceit-iOS -destination 'generic/platform=iOS Simulator
 ```
 
 ## Соглашения и грабли
+
+* **Xcode на этом Маке нет** (пользователь не стал входить в Apple ID, 14.11.2026). macOS собирается через CLT:
+  корневой `Package.swift` + `build.sh`. Грабля: у расширения-виджета точка входа должна быть `_NSExtensionMain`
+  (`-Xlinker -e -Xlinker _NSExtensionMain`), иначе процесс сразу выходит с кодом 0 и галерея виджет не показывает.
+  В CLT нет обработчика метаданных App Intents → в CLT-сборке (`CLT_BUILD`) три статических виджета (стиль выбирается
+  в галерее) и нет кнопки обновления; в Xcode-сборке — один виджет с выбором стиля в «Изменить виджет».
+* iOS проверяется только на GitHub Actions (сборка под симулятор), на телефон без Apple ID в Xcode не поставить.
+* Диагностика виджета: `/usr/bin/log show --predicate 'process == "chronod"'` (в zsh `log` — встроенная команда!).
 
 * **Xcode и всё тяжёлое — только на SSD** (просьба пользователя): KINGSTON — exFAT, Xcode там не работает, поэтому
   APFS-образ `/Volumes/KINGSTON/xcode-dev/XcodeSSD.sparsebundle` → `/Volumes/XcodeSSD` (Xcode, DerivedData, загрузки).

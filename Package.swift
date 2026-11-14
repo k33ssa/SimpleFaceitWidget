@@ -23,7 +23,7 @@ let package = Package(
             // Without Xcode there is no App Intents metadata processor, so the widget ships one static
             // widget per style instead of an AppIntent-configured one.
             swiftSettings: [.define("CLT_BUILD")],
-            linkerSettings: [.unsafeFlags(["-Xlinker", "-application_extension"])]
+            linkerSettings: [.unsafeFlags(["-Xlinker", "-application_extension", "-Xlinker", "-e", "-Xlinker", "_NSExtensionMain"])]
         ),
     ]
 )

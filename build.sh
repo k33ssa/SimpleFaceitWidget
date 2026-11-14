@@ -54,6 +54,9 @@ cat > "$APP/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
+  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+  <key>CFBundleDevelopmentRegion</key><string>ru</string>
+  <key>CFBundleSupportedPlatforms</key><array><string>MacOSX</string></array>
   <key>CFBundleIdentifier</key><string>$BUNDLE_ID</string>
   <key>CFBundleName</key><string>$NAME</string>
   <key>CFBundleDisplayName</key><string>$NAME</string>
@@ -78,6 +81,9 @@ cat > "$APPEX/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
+  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+  <key>CFBundleDevelopmentRegion</key><string>ru</string>
+  <key>CFBundleSupportedPlatforms</key><array><string>MacOSX</string></array>
   <key>CFBundleIdentifier</key><string>$BUNDLE_ID.Widget</string>
   <key>CFBundleName</key><string>SimpleFaceitWidget</string>
   <key>CFBundleDisplayName</key><string>$NAME</string>
@@ -129,6 +135,7 @@ if [ "$INSTALL" = 1 ]; then
   osascript -e "quit app \"$NAME\"" >/dev/null 2>&1 || true
   rm -rf "/Applications/$NAME.app"
   ditto "$APP" "/Applications/$NAME.app"
+  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "/Applications/$NAME.app" || true
   pluginkit -a "/Applications/$NAME.app/Contents/PlugIns/SimpleFaceitWidget.appex" 2>/dev/null || true
   open "/Applications/$NAME.app"
   echo "Done: /Applications/$NAME.app — add the widget: right-click the desktop → Edit Widgets → SimpleFaceit."
