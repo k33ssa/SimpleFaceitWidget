@@ -95,6 +95,14 @@ public enum Fmt {
         return String(format: "%.1f", v)
     }
 
+    /// 74686 → "74 686" (thin-space grouping).
+    public static func grouped(_ v: Int) -> String {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.groupingSeparator = "\u{2009}"
+        return f.string(from: NSNumber(value: v)) ?? String(v)
+    }
+
     /// "+37", "−101", "±0" (true minus sign).
     public static func signed(_ v: Int) -> String {
         if v > 0 { return "+\(v)" }

@@ -40,6 +40,8 @@ public struct Dashboard: Codable, Hashable, Sendable {
     public var lastError: String?
     /// Avatar URL the cached avatar image was downloaded from.
     public var avatarSource: URL?
+    /// Place in the region's ELO ranking (official rankings endpoint), nil if unknown.
+    public var regionRank: Int? = nil
 
     public init(profile: PlayerProfile, games: [GameRecord], summary: WindowSummary, elo: EloAnalysis, lifetime: LifetimeSummary?,
                 fetchedAt: Date, lastAttemptAt: Date, lastError: String?, avatarSource: URL?) {

@@ -113,6 +113,13 @@ public final class FaceitAPIClient: @unchecked Sendable {
         return list.items
     }
 
+    /// Position in the region's ELO ranking: `GET /rankings/games/cs2/regions/{region}/players/{player_id}` → `position`.
+    public func regionPosition(region: String, playerId: String) async throws -> Int? {
+        struct R: Decodable { let position: Int? }
+        let r: R = try await get("rankings/games/\(Self.game)/regions/\(region)/players/\(playerId)", query: ["limit": "1"])
+        return (r.position ?? 0) > 0 ? r.position : nil
+    }
+
     public func lifetimeStats(playerId: String) async throws -> PlayerLifetimeStatsDTO {
         try await get("players/\(playerId)/stats/\(Self.game)", query: [:])
     }

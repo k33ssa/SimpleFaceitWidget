@@ -206,8 +206,12 @@ public struct EloSnapshot: Codable, Hashable, Sendable {
     /// `Match Finished At` of the newest game in the same refresh (nil if no games yet).
     public let latestGameFinishedAt: Date?
     public let latestGameId: String?
+    /// `true` when the value is faceit.com's own per-match ELO ("ELO right after this match"). Such values win over
+    /// our snapshots: a snapshot can include later off-match changes (e.g. ELO returned after a cheater ban).
+    public var isMatchRecord: Bool = false
 
-    public init(takenAt: Date, elo: Int, latestGameFinishedAt: Date?, latestGameId: String?) {
+    public init(takenAt: Date, elo: Int, latestGameFinishedAt: Date?, latestGameId: String?, isMatchRecord: Bool = false) {
         self.takenAt = takenAt; self.elo = elo; self.latestGameFinishedAt = latestGameFinishedAt; self.latestGameId = latestGameId
+        self.isMatchRecord = isMatchRecord
     }
 }

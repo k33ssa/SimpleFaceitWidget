@@ -112,6 +112,7 @@ public final class StatsRepository: @unchecked Sendable {
 
         let player = PlayerProfile(dto: try await playerTask)
         guard player.elo != nil else { throw FaceitAPIError.noCS2Profile }
+        async let rankTask = Self.regionRank(client: client, region: player.region, playerId: playerId)
         let games = try await gamesTask.compactMap { GameRecord(stats: $0.stats) }
             .sorted { $0.finishedAt > $1.finishedAt }
         let lifetime = await lifetimeTask?.lifetime.map(LifetimeSummary.init)
@@ -147,8 +148,9 @@ public final class StatsRepository: @unchecked Sendable {
             avatarSource = nil
         }
 
-        let dashboard = Dashboard.build(profile: player, games: games, snapshots: store.snapshots(playerId: playerId),
+        var dashboard = Dashboard.build(profile: player, games: games, snapshots: store.snapshots(playerId: playerId),
                                         matchInfos: infos, lifetime: lifetime, fetchedAt: fetchedAt, avatarSource: avatarSource)
+        dashboard.regionRank = await rankTask
         do { try store.saveDashboard(dashboard) } catch { throw RefreshError.storage(error.localizedDescription) }
         settings.nickname = player.nickname
 
@@ -174,6 +176,11 @@ public final class StatsRepository: @unchecked Sendable {
             }
         }
         return result
+    }
+
+    private static func regionRank(client: FaceitAPIClient, region: String?, playerId: String) async -> Int? {
+        guard let region, !region.isEmpty else { return nil }
+        return (try? await client.regionPosition(region: region, playerId: playerId)) ?? nil
     }
 
     /// Downloads artwork of maps played in the window that we don't have yet (once per map).
@@ -214,8 +221,8 @@ public final class StatsRepository: @unchecked Sendable {
         for g in d.games {
             guard let candidates = byMatch[g.matchId], !candidates.isEmpty else { continue }
             let best = candidates.min { abs($0.date.timeIntervalSince(g.finishedAt)) < abs($1.date.timeIntervalSince(g.finishedAt)) }!
-            try? store.addSnapshot(EloSnapshot(takenAt: best.date.addingTimeInterval(1), elo: best.elo,
-                                               latestGameFinishedAt: g.finishedAt, latestGameId: g.id), playerId: pid)
+            try? store.addSnapshot(EloSnapshot(takenAt: best.date, elo: best.elo, latestGameFinishedAt: g.finishedAt,
+                                               latestGameId: g.id, isMatchRecord: true), playerId: pid)
             matched += 1
         }
         store.log(.info, "Импорт истории ELO с faceit.com: \(entries.count) записей, совпало игр \(matched)")

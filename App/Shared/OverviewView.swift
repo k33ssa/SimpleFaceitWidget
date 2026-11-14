@@ -67,7 +67,7 @@ struct HeroCard: View {
                     .overlay(Circle().stroke(Theme.level(d.profile.skillLevel), lineWidth: 2))
                 VStack(alignment: .leading, spacing: 3) {
                     Text(d.profile.nickname).font(.system(size: 20, weight: .heavy).width(.expanded))
-                    Caps([d.profile.country?.uppercased(), d.profile.region, "lvl \(d.profile.skillLevel ?? 0)"].compactMap { $0 }.joined(separator: " · "),
+                    Caps([d.profile.country?.uppercased(), d.regionCaps.map { "рейтинг " + $0 } ?? d.profile.region, "lvl \(d.profile.skillLevel ?? 0)"].compactMap { $0 }.joined(separator: " · "),
                          color: Theme.level(d.profile.skillLevel))
                 }
                 Spacer()
@@ -170,8 +170,12 @@ struct EloCoverageCard: View {
         VStack(alignment: .leading, spacing: 8) {
             Caps("точность изменения elo")
             if d.elo.changeIsExact {
-                Text("Изменение за \(d.elo.windowGames) игр точное — посчитано по сохранённым значениям ELO.")
+                Text("Изменение за \(d.elo.windowGames) игр точное: ELO по каждому матчу взят из статистики faceit.com и сохранённых снимков.")
                     .font(.system(size: 13))
+                if let adj = d.elo.offMatchAdjustment {
+                    Text("Из них \(Fmt.signed(adj)) — изменение вне матчей (например, возврат ELO за матч с нарушителем).")
+                        .font(.system(size: 13)).foregroundStyle(.white.opacity(0.7))
+                }
             } else {
                 Text("Официальный API FACEIT не отдаёт ELO по матчам. Точно известно \(d.elo.observedGames) из \(d.elo.windowGames) игр (по снимкам ELO, которые приложение сохраняет при каждом обновлении); остальное — оценка по шансу на победу (≈). Можно подтянуть точную историю с faceit.com в настройках.")
                     .font(.system(size: 13)).foregroundStyle(.white.opacity(0.75))

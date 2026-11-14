@@ -188,6 +188,23 @@ func game(_ id: String, win: Bool, minutesAgo: Double, match: String? = nil) -> 
         #expect(a.points[0].delta == 22 && a.points[0].source == .exact)
     }
 
+    /// Real case 14.11.2026: faceit.com says ELO after the newest match was 2400 (−13), profile says 2419 now
+    /// (+19 returned outside matches). The newest game must show −13, the window change includes the +19.
+    @Test func matchRecordsWinAndOffMatchAdjustment() {
+        let recs = [rec("g0", 2400), rec("g1", 2413), rec("g2", 2414), rec("g3", 2413), rec("g4", 2412)]
+        let mine = EloSnapshot(takenAt: Date(), elo: 2419, latestGameFinishedAt: nil, latestGameId: "g0#1")
+        let a = EloAnalyzer.analyze(games: games, currentElo: 2419, snapshots: recs + [mine], matchInfos: [:], window: 4)
+        #expect(a.points.map(\.delta) == [-13, -1, 1, 1])
+        #expect(a.points[0].eloAfter == 2400)
+        #expect(a.offMatchAdjustment == 19)
+        #expect(a.change == 2419 - 2412)
+        #expect(a.changeIsExact)
+    }
+
+    func rec(_ gameId: String, _ elo: Int) -> EloSnapshot {
+        EloSnapshot(takenAt: Date(timeIntervalSince1970: 1), elo: elo, latestGameFinishedAt: nil, latestGameId: "\(gameId)#1", isMatchRecord: true)
+    }
+
     @Test func fewerGamesThanWindow() {
         let a = EloAnalyzer.analyze(games: Array(games.prefix(2)), currentElo: 1000, snapshots: [], matchInfos: [:], window: 20)
         #expect(a.windowGames == 2)

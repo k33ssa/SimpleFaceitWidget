@@ -78,11 +78,15 @@ final class AppModel {
             switch outcome {
             case .fetched(let d):
                 dashboard = d
-                WidgetCenter.shared.reloadAllTimelines()
             case .cached(let d):
                 dashboard = d
             }
             lastError = nil
+            // Exact per-match ELO from faceit.com (unofficial, throttled to the refresh interval).
+            if await EloWebSync.shared.syncIfNeeded(repo: repo, force: force) != nil {
+                dashboard = repo.cachedDashboard()
+            }
+            WidgetCenter.shared.reloadAllTimelines()
         } catch {
             lastError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             dashboard = repo.cachedDashboard()

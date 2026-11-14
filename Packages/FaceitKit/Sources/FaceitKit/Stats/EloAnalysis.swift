@@ -37,6 +37,9 @@ public struct EloAnalysis: Codable, Hashable, Sendable {
     /// (from the newest game back to the oldest snapshot inside the window).
     public let observedGames: Int
     public let windowGames: Int
+    /// Current ELO minus ELO right after the newest game, when both are known and differ:
+    /// ELO changed outside matches (returned after a cheater ban, compensation…). Included in `change`.
+    public var offMatchAdjustment: Int? = nil
 
     public static let empty = EloAnalysis(points: [], change: nil, changeIsExact: false, observedGames: 0, windowGames: 0)
 }
@@ -68,16 +71,26 @@ public enum EloAnalyzer {
         // 1. Anchors: index → observed ELO right after games[index].
         var anchors: [Int: Int] = [0: currentElo]
         let indexById = Dictionary(games.enumerated().map { ($0.element.id, $0.offset) }, uniquingKeysWith: { a, _ in a })
-        // Latest snapshot per game id wins (an earlier one may predate FACEIT finishing the ELO update).
-        var latestByGame: [String: EloSnapshot] = [:]
+        // Per game: a match record from faceit.com wins; otherwise the latest snapshot
+        // (an earlier one may predate FACEIT finishing the ELO update).
+        var bestByGame: [String: EloSnapshot] = [:]
         for s in snapshots {
             guard let gid = s.latestGameId else { continue }
-            if let prev = latestByGame[gid], prev.takenAt >= s.takenAt { continue }
-            latestByGame[gid] = s
+            if let prev = bestByGame[gid] {
+                if prev.isMatchRecord && !s.isMatchRecord { continue }
+                if prev.isMatchRecord == s.isMatchRecord && prev.takenAt >= s.takenAt { continue }
+            }
+            bestByGame[gid] = s
         }
-        for (gid, s) in latestByGame {
-            guard let idx = indexById[gid], idx > 0 else { continue }
-            anchors[idx] = s.elo
+        var newestFromRecord: Int?
+        for (gid, s) in bestByGame {
+            guard let idx = indexById[gid] else { continue }
+            if idx == 0 {
+                // The newest game: only a per-match record may replace "current ELO" (snapshots of it ARE current ELO).
+                if s.isMatchRecord { anchors[0] = s.elo; newestFromRecord = s.elo }
+            } else {
+                anchors[idx] = s.elo
+            }
         }
 
         // 2. Per-game estimates.
@@ -130,7 +143,7 @@ public enum EloAnalyzer {
 
         // 4. ELO after each game, walking back from the newest.
         var eloAfter = [Int](repeating: 0, count: games.count)
-        eloAfter[0] = currentElo
+        eloAfter[0] = anchors[0] ?? currentElo
         for i in 1..<max(games.count, 1) where i < games.count {
             eloAfter[i] = anchors[i] ?? (eloAfter[i - 1] - deltas[i - 1])
         }
@@ -152,7 +165,9 @@ public enum EloAnalyzer {
             exact = false
         }
         let deepestAnchor = sortedAnchors.last { $0 <= n } ?? 0
-        return EloAnalysis(points: points, change: change, changeIsExact: exact,
-                           observedGames: min(deepestAnchor, n), windowGames: n)
+        var result = EloAnalysis(points: points, change: change, changeIsExact: exact,
+                                 observedGames: min(deepestAnchor, n), windowGames: n)
+        if let rec = newestFromRecord, rec != currentElo { result.offMatchAdjustment = currentElo - rec }
+        return result
     }
 }

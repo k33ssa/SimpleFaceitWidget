@@ -50,6 +50,12 @@ xcodebuild -scheme SimpleFaceit-iOS -destination 'generic/platform=iOS Simulator
   В CLT нет обработчика метаданных App Intents → в CLT-сборке (`CLT_BUILD`) три статических виджета (стиль выбирается
   в галерее) и нет кнопки обновления; в Xcode-сборке — один виджет с выбором стиля в «Изменить виджет».
 * iOS проверяется только на GitHub Actions (сборка под симулятор), на телефон без Apple ID в Xcode не поставить.
+* Точный ELO: неофициальный `www.faceit.com/api/stats/v1/stats/time/users/{id}/games/cs2` работает **только из WebKit**
+  (`App/Shared/EloWebSync.swift`, скрытый WKWebView на странице игрока); из URLSession/curl — 403 Cloudflare.
+  Пользователь просил сделать его единым — нельзя: виджеты не могут WebKit, а перенос cookie браузера = обход защиты.
+  Решение: приложение на macOS — в строке меню (MenuBarExtra) + автозапуск (SMAppService), синхронизирует само.
+* Время обновления в виджетах убрано по просьбе пользователя (14.11.2026); остаётся ⚠︎ при устаревших данных.
+  Вместо голого региона — место в рейтинге региона («EU #74 689»).
 * Диагностика виджета: `/usr/bin/log show --predicate 'process == "chronod"'` (в zsh `log` — встроенная команда!).
 
 * **Xcode и всё тяжёлое — только на SSD** (просьба пользователя): KINGSTON — exFAT, Xcode там не работает, поэтому

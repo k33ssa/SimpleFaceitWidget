@@ -13,19 +13,24 @@ struct SimpleFaceitApp: App {
     static let backgroundTaskId = "com.k33ssa.simplefaceit.refresh"
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: "main") {
             RootView()
                 .environment(model)
                 .preferredColorScheme(.dark)
                 .tint(Theme.orangeBright)
                 .onOpenURL { model.handle(url: $0) }
                 .onChange(of: phase) { _, p in
-                    if p == .active { model.startAutoRefresh() } else { model.stopAutoRefresh() }
                     #if os(iOS)
+                    if p == .active { model.startAutoRefresh() } else { model.stopAutoRefresh() }
                     if p == .background { Self.scheduleBackgroundRefresh(minutes: model.settings.refreshMinutes) }
                     #endif
                 }
-                .task { model.startAutoRefresh() }
+                .task {
+                    model.startAutoRefresh()
+                    #if os(macOS)
+                    LoginItem.enableOnFirstLaunch()
+                    #endif
+                }
             #if os(macOS)
                 .frame(minWidth: 860, minHeight: 600)
             #endif
@@ -38,6 +43,15 @@ struct SimpleFaceitApp: App {
                     .keyboardShortcut("r")
             }
         }
+        #endif
+        #if os(macOS)
+        // Stays in the menu bar with the window closed and keeps syncing (incl. exact ELO) for the widgets.
+        MenuBarExtra {
+            MenuBarContent().environment(model)
+        } label: {
+            MenuBarLabel().environment(model)
+        }
+        .menuBarExtraStyle(.window)
         #endif
         #if os(iOS)
         .backgroundTask(.appRefresh(Self.backgroundTaskId)) {

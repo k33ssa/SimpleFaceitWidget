@@ -335,8 +335,9 @@ public struct SlashShape: Shape {
     }
 }
 
-// MARK: - Update stamp
+// MARK: - Staleness mark
 
+/// Widgets show no clock (user's choice, 14.11.2026); only a warning when the data is stale or the last refresh failed.
 public struct UpdatedStamp: View {
     let data: WidgetData
     var color: Color? = nil
@@ -345,16 +346,10 @@ public struct UpdatedStamp: View {
     public init(data: WidgetData, color: Color? = nil) { self.data = data; self.color = color }
 
     public var body: some View {
-        if let d = data.dashboard {
-            HStack(spacing: 3) {
-                if data.isStale || d.lastError != nil {
-                    Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(Color(hex: 0xF4A100))
-                }
-                Caps(Fmt.updated(d.fetchedAt, now: data.now), color: color)
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Обновлено \(Fmt.updated(d.fetchedAt, now: data.now))" + (d.lastError != nil ? ", последнее обновление не удалось" : ""))
+        if let d = data.dashboard, data.isStale || d.lastError != nil {
+            Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 9, weight: .bold))
+                .foregroundStyle(Color(hex: 0xF4A100))
+                .accessibilityLabel("Данные устарели: обновлено \(Fmt.updated(d.fetchedAt, now: data.now))")
         }
     }
 }

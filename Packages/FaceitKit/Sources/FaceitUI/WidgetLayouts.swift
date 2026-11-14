@@ -165,9 +165,14 @@ struct MessageView: View {
     }
 }
 
-extension Dashboard {
-    var wl: String { "\(summary.wins) W — \(summary.losses) L" }
-    var levelCaps: String { "LVL \(profile.skillLevel.map(String.init) ?? "—")" }
+public extension Dashboard {
+    internal var wl: String { "\(summary.wins) W — \(summary.losses) L" }
+    internal var levelCaps: String { "LVL \(profile.skillLevel.map(String.init) ?? "—")" }
+    /// "EU #74 686" (region ranking) or nil when the rank is unknown — the bare region is not shown.
+    public var regionCaps: String? {
+        guard let r = profile.region, let pos = regionRank else { return nil }
+        return "\(r) #\(Fmt.grouped(pos))"
+    }
 }
 
 // MARK: - Arena
@@ -227,6 +232,7 @@ struct ArenaLayout<Accessory: View>: View {
             HStack(spacing: 6) {
                 Caps(d.profile.nickname, color: Theme.primary(scheme).opacity(0.8))
                 Caps("· " + d.levelCaps, color: levelColor)
+                if let rc = d.regionCaps { Caps("· " + rc) }
                 Spacer(minLength: 4)
                 UpdatedStamp(data: data)
                 accessory
@@ -263,7 +269,7 @@ struct ArenaLayout<Accessory: View>: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(d.profile.nickname).font(.system(size: 14, weight: .bold).width(.expanded))
                         .foregroundStyle(Theme.primary(scheme)).lineLimit(1)
-                    Caps([d.levelCaps, d.profile.region].compactMap { $0 }.joined(separator: " · "), color: levelColor)
+                    Caps([d.levelCaps, d.regionCaps].compactMap { $0 }.joined(separator: " · "), color: levelColor)
                 }
                 Spacer(minLength: 4)
                 UpdatedStamp(data: data)
@@ -388,7 +394,7 @@ struct PulseLayout<Accessory: View>: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Caps("elo · " + d.profile.nickname + " · " + d.levelCaps)
+                    Caps((["elo", d.profile.nickname, d.levelCaps] + [d.regionCaps].compactMap { $0 }).joined(separator: " · "))
                     Hero(value: d.profile.elo, size: 84)
                     DeltaChip(elo: d.elo, size: 12.5, suffix: "за \(d.elo.windowGames) игр")
                 }
@@ -604,6 +610,9 @@ struct RankLayout<Accessory: View>: View {
                 Caps(toNext, color: Theme.primary(scheme).opacity(0.8))
             }
             .padding(.top, 22)
+            if let rc = d.regionCaps {
+                Caps("рейтинг " + rc, color: Theme.level(d.profile.skillLevel)).padding(.top, 6)
+            }
             Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 10) {
                 GridRow {
                     StatCell("avg kills", Fmt.one(d.summary.avgKills), size: 20)

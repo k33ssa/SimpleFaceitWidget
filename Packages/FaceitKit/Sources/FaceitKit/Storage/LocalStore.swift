@@ -30,6 +30,8 @@ public final class LocalStore: @unchecked Sendable {
         CREATE TABLE IF NOT EXISTS log(
             id INTEGER PRIMARY KEY AUTOINCREMENT, ts REAL NOT NULL, level TEXT NOT NULL, source TEXT NOT NULL, message TEXT NOT NULL);
         """)
+        // v2: per-match records from faceit.com (ignored error = column already exists).
+        try? db.exec("ALTER TABLE elo_snapshot ADD COLUMN is_record INTEGER NOT NULL DEFAULT 0;")
     }
 
     private let encoder: JSONEncoder = { let e = JSONEncoder(); e.dateEncodingStrategy = .secondsSince1970; return e }()
@@ -72,28 +74,35 @@ public final class LocalStore: @unchecked Sendable {
     public func addSnapshot(_ s: EloSnapshot, playerId: String) throws {
         // Skip exact duplicates of the latest snapshot to keep the table small,
         // but always move its timestamp forward (proves the value is still current).
-        if let last = snapshots(playerId: playerId, limit: 1).first,
+        if s.isMatchRecord {
+            // One record per game: replace any previous record for it.
+            try db.run("DELETE FROM elo_snapshot WHERE player_id=? AND latest_game_id=? AND is_record=1",
+                       [.text(playerId), s.latestGameId.map { .text($0) } ?? .null])
+        } else if let last = snapshots(playerId: playerId, limit: 1, records: false).first,
            last.elo == s.elo, last.latestGameId == s.latestGameId {
-            try db.run("UPDATE elo_snapshot SET taken_at=? WHERE player_id=? AND taken_at=?",
+            try db.run("UPDATE elo_snapshot SET taken_at=? WHERE player_id=? AND taken_at=? AND is_record=0",
                        [.double(s.takenAt.timeIntervalSince1970), .text(playerId), .double(last.takenAt.timeIntervalSince1970)])
             return
         }
-        try db.run("INSERT INTO elo_snapshot(player_id, taken_at, elo, latest_game_id, latest_finished) VALUES(?,?,?,?,?)", [
+        try db.run("INSERT INTO elo_snapshot(player_id, taken_at, elo, latest_game_id, latest_finished, is_record) VALUES(?,?,?,?,?,?)", [
             .text(playerId), .double(s.takenAt.timeIntervalSince1970), .int(Int64(s.elo)),
             s.latestGameId.map { .text($0) } ?? .null,
             s.latestGameFinishedAt.map { .double($0.timeIntervalSince1970) } ?? .null,
+            .int(s.isMatchRecord ? 1 : 0),
         ])
     }
 
-    /// Newest first.
-    public func snapshots(playerId: String, limit: Int = 5000) -> [EloSnapshot] {
+    /// Newest first. `records`: nil = all, true = only faceit.com match records, false = only our snapshots.
+    public func snapshots(playerId: String, limit: Int = 5000, records: Bool? = nil) -> [EloSnapshot] {
+        let filter = records.map { $0 ? " AND is_record=1" : " AND is_record=0" } ?? ""
         let rows = (try? db.query(
-            "SELECT taken_at, elo, latest_game_id, latest_finished FROM elo_snapshot WHERE player_id=? ORDER BY taken_at DESC LIMIT ?",
+            "SELECT taken_at, elo, latest_game_id, latest_finished, is_record FROM elo_snapshot WHERE player_id=?\(filter) ORDER BY taken_at DESC LIMIT ?",
             [.text(playerId), .int(Int64(limit))])) ?? []
         return rows.compactMap { r in
             guard let t = r[0].double, let e = r[1].int else { return nil }
-            return EloSnapshot(takenAt: Date(timeIntervalSince1970: t), elo: e, latestGameId: r[2].text,
-                               latestFinished: r[3].double.map { Date(timeIntervalSince1970: $0) })
+            return EloSnapshot(takenAt: Date(timeIntervalSince1970: t), elo: e,
+                               latestGameFinishedAt: r[3].double.map { Date(timeIntervalSince1970: $0) },
+                               latestGameId: r[2].text, isMatchRecord: (r[4].int ?? 0) == 1)
         }
     }
 
@@ -165,11 +174,6 @@ public final class LocalStore: @unchecked Sendable {
     }
 }
 
-private extension EloSnapshot {
-    init(takenAt: Date, elo: Int, latestGameId: String?, latestFinished: Date?) {
-        self.init(takenAt: takenAt, elo: elo, latestGameFinishedAt: latestFinished, latestGameId: latestGameId)
-    }
-}
 
 /// Which process wrote a log line.
 public enum ProcessKind: String, Sendable {
