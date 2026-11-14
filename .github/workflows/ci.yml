@@ -1,0 +1,50 @@
+name: CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  package-tests:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_16*.app | sort -V | tail -1)" && xcodebuild -version
+      - name: FaceitKit tests
+        run: cd Packages/FaceitKit && swift test
+
+  xcode-builds:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_16*.app | sort -V | tail -1)" && xcodebuild -version
+      - name: Generate project
+        run: brew install xcodegen && xcodegen generate
+      - name: Build iOS (simulator)
+        run: |
+          xcodebuild -project SimpleFaceitWidget.xcodeproj -scheme SimpleFaceit-iOS \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO build | tail -40
+          test "${PIPESTATUS[0]}" -eq 0
+      - name: Build macOS (Xcode project)
+        run: |
+          xcodebuild -project SimpleFaceitWidget.xcodeproj -scheme SimpleFaceit-macOS \
+            -destination 'generic/platform=macOS' -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" build | tail -40
+          test "${PIPESTATUS[0]}" -eq 0
+      - name: Check App Intents metadata
+        run: find build/dd -name "Metadata.appintents" -maxdepth 8 | head
+      - name: Upload iOS simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: SimpleFaceit-iOS-simulator
+          path: build/dd/Build/Products/Debug-iphonesimulator/SimpleFaceit.app
+
+  clt-build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with Command Line Tools path (build.sh, unsigned)
+        run: SIGN_IDENTITY=- NO_BUNDLED_KEY=1 ./build.sh --no-install

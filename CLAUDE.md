@@ -1,0 +1,58 @@
+# SimpleFaceitWidget — карта проекта
+
+Нативное приложение + виджеты статистики FACEIT CS2 для **macOS** (Small/Medium/Large) и **iOS** (главный — Small).
+Swift / SwiftUI / WidgetKit / App Intents / Swift Charts, хранение — SQLite + JSON в общем App Group.
+Репозиторий: `github.com/k33ssa/SimpleFaceitWidget` (публиковать туда). Задачи — в `TODO.md`.
+
+## Где что лежит
+
+| путь | что |
+|---|---|
+| `Packages/FaceitKit/Sources/FaceitKit` | общий слой данных: `API/` (клиент Data API v4, DTO), `Model/`, `Stats/` (метрики, рейтинг, ELO), `Storage/` (SQLite, App Group, ключ, настройки), `Sync/StatsRepository.swift` (единая точка обновления) |
+| `Packages/FaceitKit/Sources/FaceitUI` | общий SwiftUI: тема, компоненты (лента, кривая, кольцо уровня), раскладки виджетов 3 стиля × 3 размера |
+| `Packages/FaceitKit/Sources/SnapshotTool` | рендер всех виджетов в PNG **на живых данных** (и иконки) — работает без Xcode |
+| `Packages/FaceitKit/Tests` | тесты (swift-testing) + `Fixtures/` — настоящие ответы API игрока shmeeel от 14.11.2026 |
+| `App/Shared` | код приложения (общий для macOS и iOS), ассеты, иконка |
+| `App/macOS`, `App/iOS` | Info.plist / entitlements (генерирует XcodeGen) |
+| `Widget/` | виджет-расширение: провайдер таймлайна, выбор стиля (AppIntent), кнопка «обновить» |
+| `project.yml` | спецификация XcodeGen → `SimpleFaceitWidget.xcodeproj` (в git не кладётся) |
+| `Config/Base.xcconfig` | общие настройки; `Config/Secrets.xcconfig` (в .gitignore) — `FACEIT_API_KEY` для личных сборок |
+| `docs/API_RESEARCH.md` | что есть в FACEIT API, что нет (с источниками) |
+| `docs/METRICS.md` | каждая метрика: источник, формула, период, пропуски; как считается ELO за 20 |
+| `docs/ARCHITECTURE.md` | устройство обновления, кэша, дедупликации, хранения ключа |
+| `docs/design/` | концепции дизайна и рендеры виджетов |
+
+## Как запускать
+
+```bash
+# тесты и рендер виджетов — достаточно Command Line Tools
+cd Packages/FaceitKit && swift test
+FACEIT_API_KEY=$(cat ~/.config/faceit/api_key) swift run SnapshotTool --player shmeeel --out /tmp/snap   # → widgets-dark/light.png
+swift run SnapshotTool --icon --out /tmp/icon
+
+# приложения (нужен Xcode; стоит на SSD, см. ниже)
+hdiutil attach /Volumes/KINGSTON/xcode-dev/XcodeSSD.sparsebundle -nobrowse   # если не смонтирован
+export DEVELOPER_DIR=/Volumes/XcodeSSD/Xcode-16.4.0.app/Contents/Developer       # путь уточнить по факту
+xcodegen generate
+xcodebuild -scheme SimpleFaceit-macOS -destination 'platform=macOS' -derivedDataPath /Volumes/XcodeSSD/DerivedData build
+xcodebuild -scheme SimpleFaceit-iOS -destination 'generic/platform=iOS Simulator' -derivedDataPath /Volumes/XcodeSSD/DerivedData build
+```
+
+## Соглашения и грабли
+
+* **Xcode и всё тяжёлое — только на SSD** (просьба пользователя): KINGSTON — exFAT, Xcode там не работает, поэтому
+  APFS-образ `/Volumes/KINGSTON/xcode-dev/XcodeSSD.sparsebundle` → `/Volumes/XcodeSSD` (Xcode, DerivedData, загрузки).
+  Xcode выбирать через `DEVELOPER_DIR`, `xcode-select -s` требует sudo. Xcode 16.4 — последний под macOS 15.5.
+* **API-ключ** пользователя: `~/.config/faceit/api_key` (600). Не печатать, в git/доки/память не писать.
+* **Официальный API не отдаёт ELO по матчам.** Изменение за 20 = снимки ELO (точно) + оценка по `winProbability` (≈)
+  + по желанию импорт с faceit.com через WebKit (неофициально). Подробно — `docs/METRICS.md`. Не выдавать оценку за точное.
+* Ключи статистики FACEIT — свободные словари со **строковыми** значениями; отсутствие ключа — норма (ADR нет до
+  ~06.2024). Пропуск ≠ 0.
+* `/players/{id}/games/cs2/stats` — новые сверху; на экране лента **старые слева → новые справа**.
+* `Score` "a / b" идёт в порядке фракций, счёт своей команды — `Final Score`.
+* App Group: macOS `3P6X2MU65Y.com.k33ssa.simplefaceit` (с префиксом команды — без профиля), iOS
+  `group.com.k33ssa.simplefaceit` (нужен профиль). Читается из Info.plist `FSAppGroupIdentifier`.
+* Никаких демо-чисел: плейсхолдер виджета показывает кэш или пустое состояние.
+* Дизайн утверждён пользователем 14.11.2026: три стиля Arena / Pulse / Rank, выбор в «Изменить виджет», шрифт — системный SF
+  (Compressed/Expanded), кит 9ONE не обязателен.
+* Git: без упоминаний ИИ-ассистента где угодно (глобальное правило), коммиты — по явным путям, сообщение для правок доков — «add fixes».

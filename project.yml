@@ -1,0 +1,170 @@
+# XcodeGen spec — `xcodegen generate` creates SimpleFaceitWidget.xcodeproj (not committed).
+name: SimpleFaceitWidget
+options:
+  bundleIdPrefix: com.k33ssa
+  createIntermediateGroups: true
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "17.0"
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+settings:
+  base:
+    DEVELOPMENT_TEAM: 3P6X2MU65Y
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+packages:
+  FaceitKit:
+    path: Packages/FaceitKit
+
+targets:
+  # ---------------- macOS ----------------
+  SimpleFaceit-macOS:
+    type: application
+    platform: macOS
+    sources: [App/Shared, App/macOS]
+    dependencies:
+      - package: FaceitKit
+        product: FaceitKit
+      - package: FaceitKit
+        product: FaceitUI
+      - target: SimpleFaceitWidget-macOS
+    info:
+      path: App/macOS/Info.plist
+      properties:
+        CFBundleDisplayName: SimpleFaceit
+        CFBundleName: SimpleFaceit
+        LSApplicationCategoryType: public.app-category.sports
+        FSAppGroupIdentifier: 3P6X2MU65Y.com.k33ssa.simplefaceit
+        FSBundledAPIKey: $(FACEIT_API_KEY)
+        CFBundleURLTypes:
+          - CFBundleURLName: com.k33ssa.simplefaceit
+            CFBundleURLSchemes: [faceitstats]
+    entitlements:
+      path: App/macOS/App.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.application-groups: [3P6X2MU65Y.com.k33ssa.simplefaceit]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.k33ssa.SimpleFaceitWidget
+        PRODUCT_NAME: SimpleFaceit
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Development"
+        PROVISIONING_PROFILE_SPECIFIER: ""
+
+  SimpleFaceitWidget-macOS:
+    type: app-extension
+    platform: macOS
+    sources: [Widget]
+    dependencies:
+      - package: FaceitKit
+        product: FaceitKit
+      - package: FaceitKit
+        product: FaceitUI
+    info:
+      path: Widget/Info-macOS.plist
+      properties:
+        CFBundleDisplayName: SimpleFaceit
+        FSAppGroupIdentifier: 3P6X2MU65Y.com.k33ssa.simplefaceit
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Widget/Widget-macOS.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.application-groups: [3P6X2MU65Y.com.k33ssa.simplefaceit]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.k33ssa.SimpleFaceitWidget.Widget
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Development"
+        PROVISIONING_PROFILE_SPECIFIER: ""
+
+  # ---------------- iOS ----------------
+  SimpleFaceit-iOS:
+    type: application
+    platform: iOS
+    sources: [App/Shared, App/iOS]
+    dependencies:
+      - package: FaceitKit
+        product: FaceitKit
+      - package: FaceitKit
+        product: FaceitUI
+      - target: SimpleFaceitWidget-iOS
+    info:
+      path: App/iOS/Info.plist
+      properties:
+        CFBundleDisplayName: SimpleFaceit
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIUserInterfaceStyle: Dark
+        FSAppGroupIdentifier: group.com.k33ssa.simplefaceit
+        FSBundledAPIKey: $(FACEIT_API_KEY)
+        BGTaskSchedulerPermittedIdentifiers: [com.k33ssa.simplefaceit.refresh]
+        UIBackgroundModes: [fetch]
+        CFBundleURLTypes:
+          - CFBundleURLName: com.k33ssa.simplefaceit
+            CFBundleURLSchemes: [faceitstats]
+    entitlements:
+      path: App/iOS/App.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.k33ssa.simplefaceit]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.k33ssa.SimpleFaceitWidget
+        PRODUCT_NAME: SimpleFaceit
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+
+  SimpleFaceitWidget-iOS:
+    type: app-extension
+    platform: iOS
+    sources: [Widget]
+    dependencies:
+      - package: FaceitKit
+        product: FaceitKit
+      - package: FaceitKit
+        product: FaceitUI
+    info:
+      path: Widget/Info-iOS.plist
+      properties:
+        CFBundleDisplayName: SimpleFaceit
+        FSAppGroupIdentifier: group.com.k33ssa.simplefaceit
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Widget/Widget-iOS.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.k33ssa.simplefaceit]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.k33ssa.SimpleFaceitWidget.Widget
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+
+schemes:
+  SimpleFaceit-macOS:
+    build:
+      targets:
+        SimpleFaceit-macOS: all
+        SimpleFaceitWidget-macOS: all
+    run:
+      config: Debug
+  SimpleFaceit-iOS:
+    build:
+      targets:
+        SimpleFaceit-iOS: all
+        SimpleFaceitWidget-iOS: all
+    run:
+      config: Debug

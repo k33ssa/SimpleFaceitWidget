@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><title>SimpleFaceitWidget — концепции v2</title>
+<style>
+@font-face{font-family:SFV;src:url("file:///System/Library/Fonts/SFNS.ttf")}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1b1c20;font-family:SFV,-apple-system,sans-serif;color:#fff;padding:36px 40px;-webkit-font-smoothing:antialiased}
+h2{font-size:15px;font-weight:600;color:#fff;margin:0 0 4px;letter-spacing:.01em}
+.note{font-size:12px;color:rgba(255,255,255,.5);margin:0 0 16px}
+.row{display:flex;gap:28px;align-items:flex-start;margin:0 0 44px}
+.w{position:relative;overflow:hidden;border-radius:26px;flex:none;background:#0b0b0d}
+.mac{width:464px;height:221px}.ios{width:170px;height:170px;border-radius:24px}.lg{width:464px;height:464px}
+.bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.num{font-variation-settings:"wdth" 40,"wght" 900,"opsz" 96;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:.86}
+.wide{font-variation-settings:"wdth" 135,"wght" 760}
+.cap{font-variation-settings:"wdth" 120,"wght" 650;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.v{font-variation-settings:"wdth" 70,"wght" 800,"opsz" 40;font-variant-numeric:tabular-nums;font-size:22px;line-height:1}
+.strip{display:flex;gap:3px}
+.strip i{display:block;flex:1;transform:skewX(-14deg);border-radius:1.5px}
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 8px 3px 7px;font-variation-settings:"wdth" 90,"wght" 750;font-size:12px}
+.lt .cap{color:rgba(20,20,26,.5)}
+</style></head><body>
+
+<h2>1 · Arena</h2>
+<p class="note">Фон — арт карты последнего матча (официальное поле FACEIT), затемнён и подсвечен оранжевым снизу. Огромный сжатый ELO, лента 20 игр как «полоска здоровья»: старые слева, новые справа.</p>
+<div class="row">
+ <div class="w mac">
+  <div class="bg" style="background-image:url(MAP);filter:saturate(.7) brightness(.55)"></div>
+  <div class="bg" style="background:linear-gradient(90deg,#0b0b0d 18%,rgba(11,11,13,.82) 48%,rgba(11,11,13,.25) 100%)"></div>
+  <div class="bg" style="background:radial-gradient(120% 90% at 0% 115%,rgba(255,85,0,.55),rgba(255,85,0,0) 60%)"></div>
+  <div style="position:absolute;left:22px;top:20px" class="cap">shmeeel · <span style="color:#ff6a1a">lvl 8</span></div>
+  <div style="position:absolute;right:22px;top:20px" class="cap">02:40</div>
+  <div style="position:absolute;left:20px;top:40px" class="num" ><span style="font-size:96px">1571</span></div>
+  <div style="position:absolute;left:22px;top:130px"><span class="chip" style="background:rgba(244,78,78,.18);color:#ff6b6b">▼ 101 <span style="opacity:.6;font-variation-settings:'wdth' 90,'wght' 500">≈ · 20 игр</span></span></div>
+  <div style="position:absolute;right:22px;top:46px;display:grid;grid-template-columns:auto auto;gap:12px 22px;text-align:right">
+   <div><div class="cap">win rate</div><div class="v">40<small style="font-size:13px">%</small></div></div>
+   <div><div class="cap">k/d</div><div class="v">0.99</div></div>
+   <div><div class="cap">hs</div><div class="v">47<small style="font-size:13px">%</small></div></div>
+   <div><div class="cap">adr</div><div class="v">86.7</div></div>
+  </div>
+  <div style="position:absolute;left:22px;right:22px;bottom:20px">
+   <div style="display:flex;justify-content:space-between;margin-bottom:7px" class="cap"><span>8 W — 12 L</span><span style="color:#fff">сейчас ›</span></div>
+   <div class="strip S" style="height:16px"></div>
+  </div>
+ </div>
+ <div class="w ios">
+  <div class="bg" style="background-image:url(MAP);filter:saturate(.7) brightness(.45)"></div>
+  <div class="bg" style="background:linear-gradient(180deg,rgba(11,11,13,.35),#0b0b0d 85%)"></div>
+  <div class="bg" style="background:radial-gradient(120% 80% at 0% 110%,rgba(255,85,0,.5),rgba(255,85,0,0) 60%)"></div>
+  <div style="position:absolute;left:14px;top:13px" class="cap"><span style="color:#ff6a1a">lvl 8</span></div>
+  <div style="position:absolute;right:14px;top:13px" class="cap">02:40</div>
+  <div style="position:absolute;left:13px;top:34px" class="num"><span style="font-size:70px">1571</span></div>
+  <div style="position:absolute;left:14px;top:100px;display:flex;gap:6px;align-items:center"><span class="chip" style="background:rgba(244,78,78,.2);color:#ff6b6b;font-size:11px;padding:2px 7px">▼ 101</span><span class="cap" style="color:rgba(255,255,255,.75);letter-spacing:.06em">40% WR</span></div>
+  <div style="position:absolute;left:14px;right:14px;bottom:14px"><div class="strip S" style="height:14px;gap:2px"></div></div>
+ </div>
+ <div class="w ios lt" style="background:#f4f2ef">
+  <div class="bg" style="background-image:url(MAP);filter:grayscale(1) contrast(.9) brightness(1.5);opacity:.35"></div>
+  <div class="bg" style="background:linear-gradient(180deg,rgba(244,242,239,.2),#f4f2ef 82%)"></div>
+  <div class="bg" style="background:radial-gradient(120% 80% at 0% 110%,rgba(255,85,0,.28),rgba(255,85,0,0) 60%)"></div>
+  <div style="position:absolute;left:14px;top:13px" class="cap"><span style="color:#e24a00">lvl 8</span></div>
+  <div style="position:absolute;right:14px;top:13px" class="cap">02:40</div>
+  <div style="position:absolute;left:13px;top:34px;color:#121216" class="num"><span style="font-size:70px">1571</span></div>
+  <div style="position:absolute;left:14px;top:100px;display:flex;gap:6px;align-items:center"><span class="chip" style="background:rgba(217,62,62,.14);color:#c93636;font-size:11px;padding:2px 7px">▼ 101</span><span class="cap" style="color:rgba(20,20,26,.7);letter-spacing:.06em">40% WR</span></div>
+  <div style="position:absolute;left:14px;right:14px;bottom:14px"><div class="strip S" style="height:14px;gap:2px"></div></div>
+ </div>
+</div>
+
+<h2>2 · Pulse</h2>
+<p class="note">Весь фон — светящаяся кривая ELO по 20 играм, под каждой точкой — её исход. Цифры поверх графика.</p>
+<div class="row">
+ <div class="w mac" style="background:#09090b">
+  <svg class="bg" viewBox="0 0 464 221" preserveAspectRatio="none" style="width:100%;height:100%"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5500" stop-opacity=".45"/><stop offset="1" stop-color="#ff5500" stop-opacity="0"/></linearGradient><filter id="gl"><feGaussianBlur stdDeviation="3"/></filter></defs><path class="area" fill="url(#g1)"/><polyline class="line" fill="none" stroke="#ff7a2e" stroke-width="5" filter="url(#gl)" opacity=".7"/><polyline class="line" fill="none" stroke="#ffb27a" stroke-width="1.8"/><g class="dots"></g></svg>
+  <div style="position:absolute;left:22px;top:18px" class="cap">elo · shmeeel</div>
+  <div style="position:absolute;left:20px;top:36px;display:flex;align-items:flex-end;gap:12px"><span class="num" style="font-size:64px">1571</span><span class="chip" style="background:rgba(244,78,78,.18);color:#ff6b6b;margin-bottom:4px">▼ 101 ≈</span></div>
+  <div style="position:absolute;right:22px;top:20px;text-align:right"><div class="cap">win rate</div><div class="v" style="font-size:30px">40%</div><div class="cap" style="margin-top:2px">8 W · 12 L</div></div>
+  <div style="position:absolute;left:22px;right:22px;bottom:16px;display:flex;justify-content:space-between">
+   <span class="cap">k/d <b style="color:#fff">0.99</b></span><span class="cap">hs <b style="color:#fff">47%</b></span><span class="cap">adr <b style="color:#fff">86.7</b></span><span class="cap">rating <b style="color:#fff">1.04</b></span><span class="cap">02:40</span>
+  </div>
+ </div>
+ <div class="w ios" style="background:#09090b">
+  <svg class="bg" viewBox="0 0 170 170" preserveAspectRatio="none" style="width:100%;height:100%"><path class="area-s" fill="url(#g1)"/><polyline class="line-s" fill="none" stroke="#ff7a2e" stroke-width="4" filter="url(#gl)" opacity=".7"/><polyline class="line-s" fill="none" stroke="#ffb27a" stroke-width="1.5"/></svg>
+  <div style="position:absolute;left:14px;top:13px" class="cap">elo · lvl 8</div>
+  <div style="position:absolute;left:13px;top:31px" class="num"><span style="font-size:58px">1571</span></div>
+  <div style="position:absolute;left:14px;top:88px" class="chip" ><span style="color:#ff6b6b">▼ 101</span><span class="cap" style="letter-spacing:.06em;color:rgba(255,255,255,.7)">· 40%</span></div>
+  <div style="position:absolute;left:14px;right:14px;bottom:13px"><div class="strip S" style="height:5px;gap:2px"></div></div>
+ </div>
+</div>
+
+<h2>3 · Rank</h2>
+<p class="note">Сегментированное кольцо уровня (10 делений, цвет уровня) с прогрессом до следующего; диагональный оранжевый срез как фирменный жест; цифры широким начертанием.</p>
+<div class="row">
+ <div class="w mac" style="background:#0c0c0f">
+  <div class="bg" style="background:linear-gradient(115deg,transparent 58%,rgba(255,85,0,.95) 58.2%,#ff5500 70%,#c43c00 100%)"></div>
+  <div class="bg" style="background:linear-gradient(115deg,transparent 54%,rgba(255,85,0,.25) 54.2%,transparent 57.8%)"></div>
+  <svg style="position:absolute;left:18px;top:24px" width="118" height="118" viewBox="0 0 118 118" class="ring"></svg>
+  <div style="position:absolute;left:18px;top:24px;width:118px;height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center"><span class="num" style="font-size:44px">1571</span><span class="cap" style="margin-top:4px">lvl 8</span></div>
+  <div style="position:absolute;left:150px;top:30px">
+   <div class="cap">за 20 игр</div>
+   <div class="wide" style="font-size:30px;color:#ff6b6b;line-height:1.1">−101<span style="font-size:14px;opacity:.6"> ≈</span></div>
+   <div class="cap" style="margin-top:12px">до lvl 9 — <b style="color:#fff">180</b></div>
+  </div>
+  <div style="position:absolute;right:22px;top:26px;text-align:right;color:#160700">
+   <div style="font-variation-settings:'wdth' 120,'wght' 700;font-size:10px;letter-spacing:.14em;opacity:.65">WIN RATE</div>
+   <div class="wide" style="font-size:40px;line-height:1">40%</div>
+   <div style="font-variation-settings:'wdth' 120,'wght' 700;font-size:10px;letter-spacing:.14em;opacity:.65;margin-top:8px">K/D · HS · ADR</div>
+   <div style="font-variation-settings:'wdth' 100,'wght' 800;font-size:15px">0.99 · 47% · 86.7</div>
+  </div>
+  <div style="position:absolute;left:22px;width:250px;bottom:20px"><div class="strip S" style="height:16px"></div></div>
+  <div style="position:absolute;right:22px;bottom:20px;color:#160700;font-variation-settings:'wdth' 120,'wght' 700;font-size:10px;letter-spacing:.14em;opacity:.7">02:40</div>
+ </div>
+ <div class="w ios" style="background:#0c0c0f">
+  <div class="bg" style="background:linear-gradient(115deg,transparent 70%,#ff5500 70.4%,#c43c00 100%)"></div>
+  <svg style="position:absolute;left:12px;top:12px" width="96" height="96" viewBox="0 0 118 118" class="ring"></svg>
+  <div style="position:absolute;left:12px;top:12px;width:96px;height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center"><span class="num" style="font-size:36px">1571</span><span class="cap" style="font-size:9px">lvl 8</span></div>
+  <div style="position:absolute;left:14px;top:114px;display:flex;gap:8px;align-items:baseline"><span class="wide" style="color:#ff6b6b;font-size:15px">−101</span><span class="cap" style="color:rgba(255,255,255,.8);letter-spacing:.06em">40% WR</span></div>
+  <div style="position:absolute;left:14px;right:14px;bottom:14px"><div class="strip S" style="height:12px;gap:2px"></div></div>
+ </div>
+</div>
+
+<script>
+const MAP="https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/31f01daf-e531-43cf-b949-c094ebc9b3ea_1695819235255.jpeg";
+document.querySelectorAll('.bg').forEach(b=>{if(b.style.backgroundImage.includes('MAP'))b.style.backgroundImage=`url(${MAP})`});
+const res="WLWWWLWLLWWLLLLLLLLW".split("");
+const dNew=[25,-26,-25,-25,-26,-24,-26,-25,-26,25,25,-25,-25,26,-24,25,26,24,-25,25];
+const after=[1571];for(let i=1;i<20;i++)after.push(after[i-1]-dNew[i-1]);
+const elo=after.slice().reverse();
+document.querySelectorAll('.S').forEach(s=>{s.innerHTML=res.map((r,i)=>`<i style="background:${r=='W'?'#3ad37a':'#ff4d4d'};opacity:${i==19?1:.55+i*.022};${i==19?'box-shadow:0 0 8px '+(r=='W'?'#3ad37a':'#ff4d4d'):''}"></i>`).join('')});
+function curve(W,H,top,bot,cls,acls,dots){const mn=Math.min(...elo),mx=Math.max(...elo);const p=elo.map((v,i)=>[10+i*(W-20)/19,top+(1-(v-mn)/(mx-mn))*(H-top-bot)]);document.querySelectorAll(cls).forEach(l=>l.setAttribute('points',p.map(q=>q.join(',')).join(' ')));document.querySelectorAll(acls).forEach(a=>a.setAttribute('d',`M${p[0][0]},${H} `+p.map(q=>'L'+q.join(',')).join(' ')+` L${p[19][0]},${H} Z`));if(dots)document.querySelectorAll(dots).forEach(g=>g.innerHTML=p.map((q,i)=>`<circle cx="${q[0]}" cy="${q[1]}" r="${i==19?4:2.6}" fill="${res[i]=='W'?'#3ad37a':'#ff4d4d'}"/>`).join(''))}
+curve(464,221,92,46,'.line','.area','.dots');curve(170,170,96,26,'.line-s','.area-s');
+document.querySelectorAll('.ring').forEach(s=>{let h='';const c=59,r=52,seg=10,gap=5,prog=(1571-1531)/(1751-1531);for(let i=0;i<seg;i++){const a0=(135+i*27+gap/2)*Math.PI/180,a1=(135+(i+1)*27-gap/2)*Math.PI/180;const on=i<8;const p=(a)=>[c+r*Math.cos(a),c+r*Math.sin(a)];const [x0,y0]=p(a0),[x1,y1]=p(a1);h+=`<path d="M${x0},${y0} A${r},${r} 0 0 1 ${x1},${y1}" stroke="${on?'#ff6309':'rgba(255,255,255,.14)'}" stroke-width="7" fill="none" stroke-linecap="round"/>`;if(i==8){const am=a0+(a1-a0)*prog;const [xm,ym]=p(am);h+=`<path d="M${x0},${y0} A${r},${r} 0 0 1 ${xm},${ym}" stroke="#ff6309" stroke-opacity=".55" stroke-width="7" fill="none" stroke-linecap="round"/>`}}s.innerHTML=h});
+</script>
+</body></html>
