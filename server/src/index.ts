@@ -182,10 +182,16 @@ async function poll(env: Env, p: PlayerRow) {
     s.pending_gap, now, s.player_id).run();
 }
 
+// Free plan: 50 subrequests and 50 D1 queries per invocation. A poll costs 2 FACEIT requests and ≤3 queries,
+// so each minute we take the players polled longest ago, in a batch that fits. With N active players each one
+// is polled every ceil(N / BATCH) minutes — still far shorter than a CS2 match, so per-match ELO stays exact.
+const BATCH = 12;
+
 async function pollAll(env: Env) {
   const since = Date.now() - ACTIVE_CLIENT_MS;
-  const { results } = await env.DB.prepare("SELECT * FROM players WHERE last_client_at >= ? LIMIT 200")
-    .bind(since).all<PlayerRow>();
+  const { results } = await env.DB.prepare(
+    "SELECT * FROM players WHERE last_client_at >= ? ORDER BY COALESCE(polled_at, 0) ASC LIMIT ?",
+  ).bind(since, BATCH).all<PlayerRow>();
   for (const p of results) {
     try { await poll(env, p); } catch (e) { await log(env, `poll ${p.player_id} failed: ${String(e)}`); }
   }
