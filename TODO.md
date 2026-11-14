@@ -10,6 +10,9 @@
 
 ## Открыто
 
+- [ ] Xcode 16.4: распаковка на SSD запланирована на 14.11 11:22 (`/Volumes/XcodeSSD/delayed-install.sh` → `install-xcode.sh`,
+      лог `/Volumes/XcodeSSD/install.log`, итог в Telegram). После — собрать iOS, симулятор, вход Apple ID в Xcode для iPhone.
+
 - [ ] Релиз по стандарту (скилл app-standard): `release.sh` (universal arm64+x86_64, zip, `gh release`), cask в
       `k33ssa/homebrew-tap`, `install.sh`. Решить про подпись: виджету нужна подпись команды 3P6X2MU65Y (App Group с
       префиксом команды), самоподписанная «ScreenTab Local Signing» не подойдёт — проверить, как ведёт себя виджет
