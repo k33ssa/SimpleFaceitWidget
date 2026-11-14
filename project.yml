@@ -26,7 +26,10 @@ targets:
   SimpleFaceit-macOS:
     type: application
     platform: macOS
-    sources: [App/Shared, App/macOS]
+    sources:
+      - path: App/Shared
+      - path: App/macOS
+        excludes: ["*.plist", "*.entitlements"]
     dependencies:
       - package: FaceitKit
         product: FaceitKit
@@ -63,7 +66,9 @@ targets:
   SimpleFaceitWidget-macOS:
     type: app-extension
     platform: macOS
-    sources: [Widget]
+    sources:
+      - path: Widget
+        excludes: ["*.plist", "*.entitlements"]
     dependencies:
       - package: FaceitKit
         product: FaceitKit
@@ -94,7 +99,10 @@ targets:
   SimpleFaceit-iOS:
     type: application
     platform: iOS
-    sources: [App/Shared, App/iOS]
+    sources:
+      - path: App/Shared
+      - path: App/iOS
+        excludes: ["*.plist", "*.entitlements"]
     dependencies:
       - package: FaceitKit
         product: FaceitKit
@@ -130,7 +138,9 @@ targets:
   SimpleFaceitWidget-iOS:
     type: app-extension
     platform: iOS
-    sources: [Widget]
+    sources:
+      - path: Widget
+        excludes: ["*.plist", "*.entitlements"]
     dependencies:
       - package: FaceitKit
         product: FaceitKit
