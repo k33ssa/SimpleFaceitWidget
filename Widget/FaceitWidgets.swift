@@ -27,6 +27,11 @@ struct StyleIntent: WidgetConfigurationIntent {
     @Parameter(title: "Стиль", default: .arena)
     var style: StyleOption
 
+    // On a free Apple account the widget can't share the app's App Group, so it can't see the linked profile.
+    // In that case the user types the nickname here (ignored when the shared container is available, e.g. macOS).
+    @Parameter(title: "Ник FACEIT (только iPhone без App Group)")
+    var nickname: String?
+
     init() {}
     init(style: StyleOption) { self.style = style }
 }
@@ -60,8 +65,12 @@ enum TimelineLogic {
         FaceitEntry(date: Date(), data: WidgetData.load(), style: style)
     }
 
-    static func timeline(style: WidgetStyle) async -> Timeline<FaceitEntry> {
+    static func timeline(style: WidgetStyle, nickname: String? = nil) async -> Timeline<FaceitEntry> {
         let repo = StatsRepository.shared
+        // Without a shared container the widget is on its own: resolve the configured nickname to a player id here.
+        if !AppGroup.isShared, let nick = nickname?.trimmingCharacters(in: .whitespacesAndNewlines), !nick.isEmpty {
+            await ensureLinked(nick: nick, repo: repo)
+        }
         do {
             // Fresh cache (another widget or the app refreshed recently) → no network at all.
             try await repo.refresh(force: false)
@@ -76,6 +85,18 @@ enum TimelineLogic {
         let next = max(base.addingTimeInterval(interval), Date().addingTimeInterval(5 * 60))
         return Timeline(entries: [FaceitEntry(date: Date(), data: data, style: style)], policy: .after(next))
     }
+
+    /// Resolves nickname → player id once (cached in the widget's own defaults) and links it, so the shared
+    /// refresh path works unchanged. Only used on iOS free-account builds (no App Group).
+    static func ensureLinked(nick: String, repo: StatsRepository) async {
+        let settings = AppSettings()
+        let key = "widgetNick"
+        if settings.playerId != nil, UserDefaults.standard.string(forKey: key) == nick.lowercased() { return }
+        let found = (try? await repo.findPlayers(query: nick)) ?? []
+        guard let p = found.first(where: { $0.nickname.lowercased() == nick.lowercased() }) ?? found.first else { return }
+        repo.link(player: p)
+        UserDefaults.standard.set(nick.lowercased(), forKey: key)
+    }
 }
 
 #if !CLT_BUILD
@@ -85,7 +106,7 @@ struct Provider: AppIntentTimelineProvider {
         TimelineLogic.entry(style: configuration.style.style)
     }
     func timeline(for configuration: StyleIntent, in context: Context) async -> Timeline<FaceitEntry> {
-        await TimelineLogic.timeline(style: configuration.style.style)
+        await TimelineLogic.timeline(style: configuration.style.style, nickname: configuration.nickname)
     }
 }
 #else

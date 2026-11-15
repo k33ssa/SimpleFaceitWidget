@@ -129,10 +129,6 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.k33ssa.simplefaceit
             CFBundleURLSchemes: [faceitstats]
-    entitlements:
-      path: App/iOS/App.entitlements
-      properties:
-        com.apple.security.application-groups: [group.com.k33ssa.simplefaceit]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.k33ssa.SimpleFaceitWidget
@@ -161,10 +157,6 @@ targets:
         FSAppToken: $(FS_APP_TOKEN)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
-    entitlements:
-      path: Widget/Widget-iOS.entitlements
-      properties:
-        com.apple.security.application-groups: [group.com.k33ssa.simplefaceit]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.k33ssa.SimpleFaceitWidget.Widget
