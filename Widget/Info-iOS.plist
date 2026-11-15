@@ -22,6 +22,10 @@
 	<string>1</string>
 	<key>FSAppGroupIdentifier</key>
 	<string>group.com.k33ssa.simplefaceit</string>
+	<key>FSAppToken</key>
+	<string>$(FS_APP_TOKEN)</string>
+	<key>FSServerURL</key>
+	<string>$(FS_SERVER_URL)</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>
